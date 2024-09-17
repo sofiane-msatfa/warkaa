@@ -6,15 +6,15 @@ import {Collection} from "@/domain/enum/collection.js";
 
 // "9.000.006.626",01-09-1995,"0257.883.408"
 export interface BranchDocument extends Document {
-    id: string;
-    startDate: Date;
+    id: string
+    startDate: Date
     enterpriseName: string
 }
 
 const BranchSchema = new Schema<BranchDocument>(
     {
         id: {type: String, required: true},
-        startDate: {type: Date, required: true},
+        startDate: {type: Date, required: false},
         enterpriseName: {type: String, required: false}
     }
 )

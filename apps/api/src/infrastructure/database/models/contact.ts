@@ -16,9 +16,9 @@ export interface ContactDocument extends Document {
 const ContactSchema = new Schema<ContactDocument>(
     {
         entityNumber: {type: String, required: true},
-        entityContact: {type: String},
-        contactType: {type: String},
-        value: {type: String},
+        entityContact: {type: String, required: false},
+        contactType: {type: String, required: false},
+        value: {type: String, required: false},
     }
 )
 

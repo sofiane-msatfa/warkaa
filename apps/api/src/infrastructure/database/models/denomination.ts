@@ -16,9 +16,9 @@ export interface DenominationDocument extends Document {
 const DenominationSchema = new Schema<DenominationDocument>(
     {
         entityNumber: {type: String, required: true},
-        language: {type: String, required: true},
-        typeOfDenomination: {type: String, required: true},
-        denomination: {type: String, required: true},
+        language: {type: String, required: false},
+        typeOfDenomination: {type: String, required: false},
+        denomination: {type: String, required: false},
     }
 )
 

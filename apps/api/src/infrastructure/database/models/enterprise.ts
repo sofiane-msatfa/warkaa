@@ -18,11 +18,11 @@ export interface EnterpriseDocument extends Document {
 const EnterpriseSchema = new Schema<EnterpriseDocument>(
     {
         enterpriseNumber: {type: String, required: true},
-        status: {type: String, required: true},
-        juridicalSituation: {type: String, required: true},
-        typeOfEnterprise: {type: String, required: true},
-        juridicalForm: {type: String, required: true},
-        startDate: {type: Date, required: true},
+        status: {type: String, required: false},
+        juridicalSituation: {type: String, required: false},
+        typeOfEnterprise: {type: String, required: false},
+        juridicalForm: {type: String, required: false},
+        startDate: {type: Date, required: false},
     }
 )
 

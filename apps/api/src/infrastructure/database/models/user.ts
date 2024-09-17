@@ -8,7 +8,6 @@ export interface UserDocument extends Document {
   email: string;
   password: string;
   deletedAt: Date | null;
-  events?: Types.ObjectId[];
 }
 
 const userSchema = new Schema<UserDocument>(

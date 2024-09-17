@@ -15,8 +15,8 @@ export interface EstablishmentDocument extends Document {
 const EstablishmentSchema = new Schema<EstablishmentDocument>(
     {
         establishmentNumber: {type: String, required: true},
-        enterpriseNumber: {type: String, required: true},
-        startDate: {type: Date},
+        enterpriseNumber: {type: String, required: false},
+        startDate: {type: Date, required: false},
     }
 )
 
