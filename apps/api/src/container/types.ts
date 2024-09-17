@@ -1,3 +1,4 @@
 export const Type = {
-  // AuthManagementApi: Symbol.for("AuthManagementApi"),
+  AuthService: Symbol.for("AuthService"),
+  UserRepository: Symbol.for("UserRepository"),
 };
