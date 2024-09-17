@@ -1,5 +1,6 @@
 {
   "name": "warkaa",
   "version": "1.0.0",
-  "description": ""
+  "description": "",
+  "packageManager": "pnpm@9.7.0"
 }

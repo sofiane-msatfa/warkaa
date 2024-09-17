@@ -1,4 +1,6 @@
 export enum Collection {
+    User = "User",
+    Tokens = "Tokens",
     Activity = 'Activity',
     Address = 'Address',
     Branch = 'Branch',

@@ -1,6 +1,16 @@
+import type { Response, RequestHandler } from "express";
 import { ErrorType } from "@/domain/enum/error-type.js";
-import type { Request, Response, NextFunction, RequestHandler } from "express";
+import { HttpCode } from "@/domain/enum/http-code.js";
 import { z } from "zod";
+import { asyncHandler } from "./async.handler.js";
+
+type Handler<Params, Query, Body> = RequestHandler<
+  Params,
+  any,
+  Body,
+  Query,
+  Record<string, any>
+>;
 
 interface DefineHandlerParams<
   Params extends z.Schema,
@@ -13,21 +23,14 @@ interface DefineHandlerParams<
     body: Body;
   }>;
   onValidationError?: (res: Response, error: z.ZodError) => void;
-  handler: RequestHandler<
-    z.infer<Params>,
-    any,
-    z.infer<Body>,
-    z.infer<Query>,
-    Record<string, any>
-  >;
+  handler: Handler<z.infer<Params>, z.infer<Query>, z.infer<Body>>;
 }
 
 function defaultOnValidationError(res: Response, error: z.ZodError) {
   const fieldErrors = error.flatten().fieldErrors;
-  const errors = Object.values(fieldErrors).flat().filter(Boolean);
-  res.status(400).json({
+  res.status(HttpCode.BAD_REQUEST).json({
     error: ErrorType.ValidationError,
-    details: errors,
+    details: fieldErrors,
   });
 }
 
@@ -35,7 +38,11 @@ export function defineHandler<
   Params extends z.Schema,
   Query extends z.Schema,
   Body extends z.Schema
->(params: DefineHandlerParams<Params, Query, Body> | RequestHandler) {
+>(
+  params:
+    | DefineHandlerParams<Params, Query, Body>
+    | Handler<Params, Query, Body>
+) {
   if (typeof params === "function") {
     return params;
   }
@@ -46,14 +53,17 @@ export function defineHandler<
     handler,
   } = params;
 
-  return async (req: Request, res: Response, next: NextFunction) => {
+  return asyncHandler(async (req, res, next) => {
     for (const [key, value] of Object.entries(schema)) {
-      // @ts-ignore flemme de typer
+      // @ts-ignore
       const result = value.safeParse(req[key]);
       if (!result.success) {
         onValidationError(res, result.error);
         return next();
       }
     }
-  };
+
+    await handler(req, res, next);
+    next();
+  });
 }
