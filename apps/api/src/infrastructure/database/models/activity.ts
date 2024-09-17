@@ -9,8 +9,8 @@ import type {EnterpriseDocument} from "@/infrastructure/database/models/enterpri
 export interface ActivityDocument extends Document {
     entityNumber: string
     activityGroup: string
-    naceVersion: number
-    naceCode: number
+    naceVersion: string
+    naceCode: string
     classification: string
 }
 
@@ -18,8 +18,8 @@ const ActivitySchema = new Schema<ActivityDocument>(
     {
         entityNumber: {type: String, required: true},
         activityGroup: {type: String, required: false},
-        naceVersion: {type: Number, required: false},
-        naceCode: {type: Number, required: false},
+        naceVersion: {type: String, required: false},
+        naceCode: {type: String, required: false},
         classification: {type: String, required: false},
     }
 )
