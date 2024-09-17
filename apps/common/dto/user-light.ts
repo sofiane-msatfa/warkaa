@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const userLight = z.object({
+export const userLightSchema = z.object({
   id: z.string().uuid(),
   firstname: z.string(),
   lastname: z.string(),
@@ -8,4 +8,4 @@ export const userLight = z.object({
   deletedAt: z.date().nullable(),
 });
 
-export type UserLight = z.infer<typeof userLight>;
+export type UserLight = z.infer<typeof userLightSchema>;

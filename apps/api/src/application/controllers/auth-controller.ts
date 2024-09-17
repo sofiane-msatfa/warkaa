@@ -8,8 +8,7 @@ import { AuthenticationErrorType } from "@/domain/enum/authentication-error-type
 import { HttpCode } from "@/domain/enum/http-code.js";
 import { registerRequestSchema } from "@common/dto/register-request.js";
 import { env } from "@/env.js";
-
-const REFRESH_TOKEN_COOKIE_NAME = "refreshToken";
+import { REFRESH_TOKEN_COOKIE_NAME } from "@/constants.js";
 
 @injectable()
 export class AuthController {
