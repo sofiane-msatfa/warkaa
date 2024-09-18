@@ -1,4 +1,3 @@
-import {DarkTheme, DefaultTheme, ThemeProvider} from '@react-navigation/native';
 import {useFonts} from 'expo-font';
 import {Stack} from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -7,7 +6,8 @@ import 'react-native-reanimated';
 
 import {useColorScheme} from '@/hooks/useColorScheme';
 import appConfig from "@/tamagui.config";
-import { TamaguiProvider } from 'tamagui'
+import {TamaguiProvider} from 'tamagui'
+import {AuthContextProvider} from "@/contexts/auth/auth-provider";
 
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -33,10 +33,18 @@ export default function RootLayout() {
 
     return (
         <TamaguiProvider config={appConfig}>
-            <Stack>
-                <Stack.Screen name="(tabs)" options={{headerShown: false}}/>
-                <Stack.Screen name="+not-found"/>
-            </Stack>
+            <AuthContextProvider>
+                <Stack
+                    screenOptions={{
+                        // headerShown: false
+                    }}
+                >
+                    <Stack.Screen name="index"/>
+                    <Stack.Screen name="/signup/index"/>
+                    <Stack.Screen name="/auth/login"/>
+                    <Stack.Screen name="/upload"/>
+                     </Stack>
+            </AuthContextProvider>
         </TamaguiProvider>
     );
 }
