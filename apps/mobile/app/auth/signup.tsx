@@ -12,56 +12,96 @@ import {
     Switch,
 } from 'tamagui';
 import { User, Mail, Lock, Eye, EyeOff } from 'lucide-react-native';
-import {Link} from "expo-router"
+import { Link, router } from "expo-router"
+import { useAuth } from '@/contexts/auth/use-auth';
 
 export default function Signup() {
     // const [showPassword, setShowPassword] = useState(false);
+    const { register } = useAuth();
     const [agreedToTerms, setAgreedToTerms] = useState(false);
+    const [formData, setFormData] = useState({
+        firstname: '',
+        lastname: '',
+        email: '',
+        password: '',
+        password_confirmation: '',
+    });
+    const [passwordsMatch, setPasswordsMatch] = useState(true);
+
+    const handleChange = (name: string, value: string) => {
+        setFormData(prevData => {
+            const updatedData = { ...prevData, [name]: value };
+            if (name === 'password' || name === 'password_confirmation') {
+                setPasswordsMatch(updatedData.password === updatedData.password_confirmation);
+            }
+            return updatedData;
+        });
+    };
+
+    const handleSubmit = async () => {
+        if (!passwordsMatch) {
+            console.error('Les mots de passe ne correspondent pas.');
+            return;
+        }
+        try {
+            const { email, firstname, lastname, password } = formData;
+            const response = await register({ email, firstname, lastname, password });
+
+            if (response.status === 201) {
+                router.push('/auth/login');
+            }
+
+        } catch (error) {
+            console.error('Erreur de connexion:', error);
+        }
+    };
 
     return (
         <SafeAreaView style={styles.container}>
             <Form
-                // bordered
                 padding="$4"
                 borderRadius="$4"
                 backgroundColor="$background"
                 width="100%"
                 maxWidth={400}
+                onSubmit={handleSubmit}
             >
-                <YStack space="$4">
+                <YStack gap="$4">
                     <Text fontSize="$8" fontWeight="bold" textAlign="center">
                         Créer un compte
                     </Text>
-
-                    <Input
-                        placeholder="Nom complet"
-                        // leftElement={<User size={20} color="$gray10" />}
-                    />
+                    <XStack gap="$2">
+                        <Input
+                            placeholder="Prénom"
+                            style={styles.input}
+                            onChangeText={(value) => handleChange('firstname', value)}
+                        />
+                        <Input
+                            placeholder="Nom"
+                            onChangeText={(value) => handleChange('lastname', value)}
+                            style={styles.input}
+                        />
+                    </XStack>
 
                     <Input
                         placeholder="Email"
                         keyboardType="email-address"
                         autoCapitalize="none"
-                        // leftElement={<Mail size={20} color="$gray10" />}
+                        onChangeText={(value) => handleChange('email', value)}
                     />
 
                     <YStack space="$2">
                         <Input
                             placeholder="Mot de passe"
-                            // secureTextEntry={!showPassword}
+                            onChangeText={(value) => handleChange('password', value)}
                         />
                         <Input
-
-                        placeholder="Confirmer le mot de passe"
-                        // secureTextEntry={!showPassword}
-                    />
-                        {/*<Button*/}
-                        {/*    size="$3"*/}
-                        {/*    circular*/}
-                        {/*    marginLeft="$2"*/}
-                        {/*    icon={showPassword ? <EyeOff /> : <Eye />}*/}
-                        {/*    onPress={() => setShowPassword(!showPassword)}*/}
-                        {/*/>*/}
+                            placeholder="Confirmer le mot de passe"
+                            onChangeText={(value) => handleChange('password_confirmation', value)}
+                        />
+                        {!passwordsMatch && (
+                            <Text color="$red10">Les mots de passe ne correspondent pas.</Text>
+                        )}
                     </YStack>
 
                     <XStack alignItems="center" space="$2">
@@ -76,14 +116,15 @@ export default function Signup() {
 
                     <Button
                         theme="active"
-                        disabled={!agreedToTerms}
+                        disabled={!agreedToTerms || !passwordsMatch}
+                        onPress={handleSubmit}
                     >
                         S'inscrire
                     </Button>
 
                     <XStack justifyContent="center" space="$2">
                         <Text>Déjà un compte ?</Text>
-                        <Link href="/auth/login" style={{color: "blue", fontWeight: "bold"}} >Se connecter</Link>
+                        <Link href="/auth/login" style={{ color: "blue", fontWeight: "bold" }} >Se connecter</Link>
                     </XStack>
                 </YStack>
             </Form>
@@ -98,5 +139,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         padding: 16,
         backgroundColor: '$background',
+    },
+    input: {
+        flex: 1,
     },
 });

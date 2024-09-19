@@ -1,11 +1,11 @@
-import React, {useState} from 'react';
-import {StyleSheet, View} from 'react-native';
-import {Button, Form, H4, Spinner, Input, YStack, XStack, Text} from 'tamagui';
-import {useAuth} from "@/contexts/auth/use-auth";
-import {router} from 'expo-router';
+import React, { useState } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { Button, Form, H4, Spinner, Input, YStack, XStack, Text } from 'tamagui';
+import { useAuth } from "@/contexts/auth/use-auth";
+import { Link, router } from 'expo-router';
 
 export default function Login() {
-    const auth = useAuth();
+    const { login } = useAuth();
     const [status, setStatus] = useState('off');
     const [formData, setFormData] = useState({
         email: '',
@@ -14,7 +14,6 @@ export default function Login() {
     const [showPassword, setShowPassword] = useState(false);
 
     const handleChange = (name: string, value: string) => {
-        console.log("Name et value", name, value)
         setFormData(prevData => ({
             ...prevData,
             [name]: value,
@@ -24,8 +23,7 @@ export default function Login() {
     const handleSubmit = async () => {
         setStatus('submitting');
         try {
-            await auth.login({email: formData.email, password: formData.password})
-
+            await login({ email: formData.email, password: formData.password })
             setStatus('submitted');
             router.push('/')
         } catch (error) {
@@ -72,7 +70,7 @@ export default function Login() {
                 </YStack>
 
                 <Button
-                    icon={status === 'submitting' ? () => <Spinner/> : undefined}
+                    icon={status === 'submitting' ? () => <Spinner /> : undefined}
                     onPress={handleSubmit}
                     disabled={status === 'submitting' || !isFormValid}
                 >
@@ -86,6 +84,7 @@ export default function Login() {
                     <Text color="$red10">Erreur de connexion. Veuillez réessayer.</Text>
                 )}
             </Form>
+            <Link href="/auth/signup" style={styles.link}>Créer un compte</Link>
         </View>
     );
 }
@@ -95,6 +94,10 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        padding: 16,
     },
+    link: {
+        marginTop: 12,
+       color: '#0000EE',
+    
+    }
 });

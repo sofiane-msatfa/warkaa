@@ -1,70 +1,94 @@
-import {RegisterRequest} from "../../../common/dto/register-request"
-import {LoginRequest} from "../../../common/dto/login-request"
-import {useEffect, useMemo, useState} from "react";
-import {api, setClientAccessToken} from "@/api/client";
-import {AccessTokenResponse} from "../../../common/dto/access-token-response";
-import {AuthContext, type AuthContextType} from "./auth-context";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from "axios";
-
+import { RegisterRequest } from "../../../common/dto/register-request";
+import { LoginRequest } from "../../../common/dto/login-request";
+import { useEffect, useMemo, useState, useCallback } from "react";
+import { api, setClientAccessToken } from "@/api/client";
+import { AccessTokenResponse } from "../../../common/dto/access-token-response";
+import { AuthContext, type AuthContextType } from "./auth-context";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios, { AxiosResponse } from "axios";
 
 interface AuthProviderProps {
-    children: React.ReactNode
+    children: React.ReactNode;
 }
 
-export function AuthContextProvider({children}: AuthProviderProps) {
-    const [accessToken, setAccessToken] = useState<string | null>(null)
-
+export function AuthContextProvider({ children }: AuthProviderProps) {
+    const [accessToken, setAccessToken] = useState<string | null>(null);
+    const [refreshToken, setRefreshToken] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const loadToken = async () => {
+        const loadTokens = async () => {
             try {
-                const token = await AsyncStorage.getItem("access_token");
-                setAccessToken(token);
-                if (token) {
-                    setClientAccessToken(token);
+                const [storedAccessToken, storedRefreshToken] = await Promise.all([
+                    AsyncStorage.getItem("access_token"),
+                    AsyncStorage.getItem("refresh_token")
+                ]);
+                if (storedAccessToken) {
+                    setAccessToken(storedAccessToken);
+                    setClientAccessToken(storedAccessToken);
+                }
+                if (storedRefreshToken) {
+                    setRefreshToken(storedRefreshToken);
                 }
             } catch (error) {
-                console.error("Erreur lors du chargement du token:", error);
+                console.error("Erreur lors du chargement des tokens:", error);
+            } finally {
+                setIsLoading(false);
             }
         };
 
-        loadToken();
-    }, [accessToken]);
+        loadTokens();
+    }, []);
 
-    // useEffect(() => {
-    //     if (accessToken) {
-    //         // TODO CREATE CLIENT ACCESS TOKEN
-    //         setClientAccessToken(accessToken)
-    //     }
-    // }, [accessToken])
+    // Fonction pour l'enregistrement
+    const register = useCallback(
+        async (credentials: RegisterRequest): Promise<AxiosResponse<any, any>> => {
+            return await api.post('/auth/register', credentials);
+        },
+        []
+    );
 
-    const register = async (credentials: RegisterRequest) => {
-        await api.post('http://10.0.2.2:3000/auth/register', credentials)
-    }
-    const login = async (credentials: LoginRequest) => {
-        try {
-            const response = await api.post<AccessTokenResponse>('http://10.0.2.2:3000/auth/login/', credentials);
-            const {accessToken} = response.data
-            console.log('accessToken : ', accessToken)
-            AsyncStorage.setItem('access_token', accessToken)
-            setAccessToken(accessToken)
-        } catch (error) {
-            if (axios.isAxiosError(error)) {
-                console.error('Erreur Axios :', error.response?.data);
-            } else {
-                console.error('Erreur inattendue :', error);
+    // Fonction pour le login
+    const login = useCallback(
+        async (credentials: LoginRequest) => {
+            try {
+                const response = await api.post<AccessTokenResponse>("/auth/login/", credentials);
+                const { accessToken, refreshToken } = response.data;
+
+                await AsyncStorage.setItem("access_token", accessToken);
+                await AsyncStorage.setItem("refresh_token", refreshToken);
+                setAccessToken(accessToken);
+                setRefreshToken(refreshToken);
+                setClientAccessToken(accessToken);
+            } catch (error) {
+                if (axios.isAxiosError(error)) {
+                    console.error("Erreur Axios :", error.response?.data);
+                } else {
+                    console.error("Erreur inattendue :", error);
+                }
             }
+        },
+        []
+    );
+
+    const logout = useCallback(async () => {
+        try {
+            const storedRefreshToken = await AsyncStorage.getItem("refresh_token");
+            if (storedRefreshToken) {
+                await api.post("/auth/logout", { refreshToken: storedRefreshToken });
+            }
+            await AsyncStorage.removeItem("access_token");
+            await AsyncStorage.removeItem("refresh_token");
+            setAccessToken(null);
+            setRefreshToken(null);
+            setClientAccessToken('');
+        } catch (error) {
+            console.error("Erreur lors de la déconnexion :", error);
         }
+    }, []);
 
-    }
 
-    const logout = async () => {
-        await api.post('/auth/logout')
-        AsyncStorage.removeItem('access_token')
-        setAccessToken(null)
-    }
-
+    // Utiliser useMemo pour éviter de recréer l'objet à chaque re-rendu
     const value: AuthContextType = useMemo(
         () => ({
             isAuthenticated: !!accessToken,
@@ -72,10 +96,19 @@ export function AuthContextProvider({children}: AuthProviderProps) {
             register,
             login,
             logout,
+            isLoading
         }),
-        [accessToken, register, login, logout],
+        [accessToken, register, login, logout, isLoading]
     );
-    console.log(children);
 
-    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+    // Ne pas rendre les enfants tant que le token est en cours de chargement
+    if (isLoading) {
+        return null; // Ou un loader si nécessaire
+    }
+
+    return (
+        <AuthContext.Provider value={value}>
+            {children}
+        </AuthContext.Provider>
+    );
 }
