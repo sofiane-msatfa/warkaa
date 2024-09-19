@@ -10,6 +10,18 @@ export function bindIdentifier<T>(
   return container.bind(identifier).to(instance).inSingletonScope();
 }
 
+export function bindIdentifierNamed<T>(
+  identifier: interfaces.ServiceIdentifier<T>,
+  instance: interfaces.Newable<T>,
+  name: string
+) {
+  return container
+    .bind(identifier)
+    .to(instance)
+    .inSingletonScope()
+    .whenTargetNamed(name);
+}
+
 export function bindSelf<T>(instance: interfaces.Newable<T>) {
   return container.bind(instance).toSelf().inSingletonScope();
 }

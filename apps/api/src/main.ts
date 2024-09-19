@@ -3,12 +3,13 @@ import {connectToMongoDb} from "@/infrastructure/database/database.js";
 
 async function main() {
   const { env } = await import("@/env.js");
-  const app = createExpressApp();
+  const app = await createExpressApp();
 
-    const databaseConnection = await connectToMongoDb()
+  const connectionResult = await connectToMongoDb(env.MONGODB_URI);
 
-  if(databaseConnection.err()) {
-    console.log('Cannot connect to database')
+  if (connectionResult.isErr()) {
+    console.error(connectionResult.unwrapErr());
+    return process.exit(1);
   }
 
   app

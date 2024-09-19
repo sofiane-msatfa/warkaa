@@ -1,7 +1,7 @@
 import { inject, injectable } from "inversify";
 import { Type } from "@/container/types.js";
 import type { Response } from "express";
-import { defineHandler } from "@/application/utils/define-handler.js";
+import { validationHandler } from "@/application/utils/validation-handler.js";
 import { loginRequestSchema } from "@common/dto/login-request.js";
 import type { AuthService } from "@/domain/usecase/auth-service.js";
 import { AuthenticationErrorType } from "@/domain/enum/authentication-error-type.js";
@@ -22,7 +22,7 @@ export class AuthController {
     @inject(Type.AuthService) private readonly authService: AuthService
   ) {}
 
-  public login = defineHandler({
+  public login = validationHandler({
     schema: {
       body: loginRequestSchema,
     },
@@ -43,7 +43,7 @@ export class AuthController {
     },
   });
 
-  public register = defineHandler({
+  public register = validationHandler({
     schema: {
       body: registerRequestSchema,
     },

@@ -4,19 +4,21 @@ import { isAuthenticated } from "@/application/middlewares/auth.js";
 import { getUserLightFromRequest } from "@/application/utils/auth.js";
 import { userRouter } from "./user-router.js";
 import { authRouter } from "./auth-router.js";
+import { uploadRouter } from "./upload-router.js";
 
 export function registerRouters(app: Express): void {
-  app.get("/health", (req, res) => {
+  app.get("/health", (_req, res) => {
     res.json({ status: "ok" });
   });
 
-  app.get("/", (req, res) => {
+  app.get("/", (_req, res) => {
     res.json({ message: "Hello, World!" });
   });
 
   // routes
-  app.use("/users", userRouter());
-  app.use("/auth", authRouter());
+  [userRouter, authRouter, uploadRouter].forEach((router) => {
+    app.use(router());
+  });
 
   app.get("/protected", isAuthenticated, (req, res) => {
     const user = getUserLightFromRequest(req);
@@ -26,7 +28,7 @@ export function registerRouters(app: Express): void {
   app.use(errorHandler);
 }
 
-const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
+const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
   console.error(err);
   res
     .status(HttpCode.INTERNAL_SERVER_ERROR)

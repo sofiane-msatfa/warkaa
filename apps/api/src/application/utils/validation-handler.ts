@@ -2,9 +2,9 @@ import type { Response, RequestHandler } from "express";
 import { ErrorType } from "@/domain/enum/error-type.js";
 import { HttpCode } from "@/domain/enum/http-code.js";
 import { z } from "zod";
-import { asyncHandler } from "./async.handler.js";
+import { asyncHandler } from "./async-handler.js";
 
-type Handler<Params, Query, Body> = RequestHandler<
+type TypedRequestHandler<Params, Query, Body> = RequestHandler<
   Params,
   any,
   Body,
@@ -17,13 +17,13 @@ interface DefineHandlerParams<
   Query extends z.Schema,
   Body extends z.Schema
 > {
-  schema?: Partial<{
+  schema: Partial<{
     params: Params;
     query: Query;
     body: Body;
   }>;
   onValidationError?: (res: Response, error: z.ZodError) => void;
-  handler: Handler<z.infer<Params>, z.infer<Query>, z.infer<Body>>;
+  handler: TypedRequestHandler<z.infer<Params>, z.infer<Query>, z.infer<Body>>;
 }
 
 function defaultOnValidationError(res: Response, error: z.ZodError) {
@@ -34,15 +34,12 @@ function defaultOnValidationError(res: Response, error: z.ZodError) {
   });
 }
 
-export function defineHandler<
+// @SOFIANE ajouter parsing headers
+export function validationHandler<
   Params extends z.Schema,
   Query extends z.Schema,
   Body extends z.Schema
->(
-  params:
-    | DefineHandlerParams<Params, Query, Body>
-    | Handler<Params, Query, Body>
-) {
+>(params: DefineHandlerParams<Params, Query, Body>): RequestHandler {
   if (typeof params === "function") {
     return params;
   }

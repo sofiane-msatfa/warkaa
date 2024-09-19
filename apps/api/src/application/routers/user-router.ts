@@ -8,8 +8,8 @@ export function userRouter(): Router {
   const router = Router();
   const controller = getInstance(UserController);
 
-  router.get("/", controller.getUsers);
-  router.get("/me", isAuthenticated, controller.getCurrentUser);
+  router.get("/users", controller.getUsers);
+  router.get("/users/me", isAuthenticated, controller.getCurrentUser);
 
   return router;
 }
