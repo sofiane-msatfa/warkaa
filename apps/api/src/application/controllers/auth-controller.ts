@@ -1,17 +1,16 @@
 import { inject, injectable } from "inversify";
 import { Type } from "@/container/types.js";
-import type { Response } from "express";
 import { validationHandler } from "@/application/utils/validation-handler.js";
 import { loginRequestSchema } from "@common/dto/login-request.js";
-import type { AuthService } from "@/domain/usecase/auth-service.js";
 import { AuthenticationErrorType } from "@/domain/enum/authentication-error-type.js";
 import { HttpCode } from "@/domain/enum/http-code.js";
 import { registerRequestSchema } from "@common/dto/register-request.js";
-import { env } from "@/env.js";
-import { REFRESH_TOKEN_COOKIE_NAME } from "@/constants.js";
+// import { env } from "@/env.js";
+// import { REFRESH_TOKEN_COOKIE_NAME } from "@/constants.js";
 import { z } from "zod";
+import type { Response } from "express";
+import type { AuthService } from "@/domain/usecase/auth-service.js";
 
-// Define a schema for refreshToken
 const refreshTokenSchema = z.object({
   refreshToken: z.string(),
 });
@@ -61,7 +60,7 @@ export class AuthController {
     },
   });
 
-  public refreshTokens = defineHandler({
+  public refreshTokens = validationHandler({
     schema: {
       body: refreshTokenSchema,
     },
@@ -72,7 +71,9 @@ export class AuthController {
         return res.status(HttpCode.BAD_REQUEST).send("Refresh token not found");
       }
 
-      const authPayload = await this.authService.refreshAuthTokens(refreshToken);
+      const authPayload = await this.authService.refreshAuthTokens(
+        refreshToken
+      );
 
       if (authPayload.isErr()) {
         const errorType = authPayload.unwrapErr();
@@ -80,13 +81,16 @@ export class AuthController {
         return next();
       }
 
-      const { accessToken, refreshToken: newRefreshToken } = authPayload.unwrap();
+      const { accessToken, refreshToken: newRefreshToken } =
+        authPayload.unwrap();
 
-      res.status(HttpCode.OK).json({ accessToken, refreshToken: newRefreshToken });
+      res
+        .status(HttpCode.OK)
+        .json({ accessToken, refreshToken: newRefreshToken });
     },
   });
 
-  public logout = defineHandler({
+  public logout = validationHandler({
     schema: {
       body: refreshTokenSchema,
     },
@@ -104,17 +108,17 @@ export class AuthController {
     },
   });
 
-  private setRefreshTokenCookie = (
-    res: Response,
-    refreshToken: string
-  ): void => {
-    res.cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "lax",
-      maxAge: env.REFRESH_TOKEN_EXPIRATION_IN_MS,
-    });
-  };
+  // private setRefreshTokenCookie = (
+  //   res: Response,
+  //   refreshToken: string
+  // ): void => {
+  //   res.cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken, {
+  //     httpOnly: true,
+  //     secure: true,
+  //     sameSite: "lax",
+  //     maxAge: env.REFRESH_TOKEN_EXPIRATION_IN_MS,
+  //   });
+  // };
 
   private handleAuthenticationError = (
     error: AuthenticationErrorType,
