@@ -1,8 +1,15 @@
 import { createExpressApp } from "@/application/app.js";
+import {connectToMongoDb} from "@/infrastructure/database/database.js";
 
 async function main() {
   const { env } = await import("@/env.js");
   const app = createExpressApp();
+
+    const databaseConnection = await connectToMongoDb()
+
+  if(databaseConnection.err()) {
+    console.log('Cannot connect to database')
+  }
 
   app
     .listen(env.PORT, () => {

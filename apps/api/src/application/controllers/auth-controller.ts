@@ -9,6 +9,12 @@ import { HttpCode } from "@/domain/enum/http-code.js";
 import { registerRequestSchema } from "@common/dto/register-request.js";
 import { env } from "@/env.js";
 import { REFRESH_TOKEN_COOKIE_NAME } from "@/constants.js";
+import { z } from "zod";
+
+// Define a schema for refreshToken
+const refreshTokenSchema = z.object({
+  refreshToken: z.string(),
+});
 
 @injectable()
 export class AuthController {
@@ -33,8 +39,7 @@ export class AuthController {
 
       const { accessToken, refreshToken } = authPayload.unwrap();
 
-      this.setRefreshTokenCookie(res, refreshToken);
-      res.status(HttpCode.OK).json({ accessToken });
+      res.status(HttpCode.OK).json({ accessToken, refreshToken });
     },
   });
 
@@ -56,38 +61,47 @@ export class AuthController {
     },
   });
 
-  public refreshTokens = defineHandler(async (req, res, next) => {
-    const refreshToken = req.cookies[REFRESH_TOKEN_COOKIE_NAME];
+  public refreshTokens = defineHandler({
+    schema: {
+      body: refreshTokenSchema,
+    },
+    handler: async (req, res, next) => {
+      const { refreshToken } = req.body;
 
-    if (!refreshToken) {
-      return res.status(HttpCode.BAD_REQUEST).send("Refresh token not found");
-    }
+      if (!refreshToken) {
+        return res.status(HttpCode.BAD_REQUEST).send("Refresh token not found");
+      }
 
-    const authPayload = await this.authService.refreshAuthTokens(refreshToken);
+      const authPayload = await this.authService.refreshAuthTokens(refreshToken);
 
-    if (authPayload.isErr()) {
-      const errorType = authPayload.unwrapErr();
-      this.handleAuthenticationError(errorType, res);
-      return next();
-    }
+      if (authPayload.isErr()) {
+        const errorType = authPayload.unwrapErr();
+        this.handleAuthenticationError(errorType, res);
+        return next();
+      }
 
-    const { accessToken, refreshToken: newRefreshToken } = authPayload.unwrap();
+      const { accessToken, refreshToken: newRefreshToken } = authPayload.unwrap();
 
-    this.setRefreshTokenCookie(res, newRefreshToken);
-    res.status(HttpCode.OK).json({ accessToken });
+      res.status(HttpCode.OK).json({ accessToken, refreshToken: newRefreshToken });
+    },
   });
 
-  public logout = defineHandler(async (req, res) => {
-    const refreshToken = req.cookies[REFRESH_TOKEN_COOKIE_NAME];
+  public logout = defineHandler({
+    schema: {
+      body: refreshTokenSchema,
+    },
+    handler: async (req, res) => {
+      const { refreshToken } = req.body;
 
-    if (!refreshToken) {
-      return res.status(HttpCode.BAD_REQUEST).send("Refresh token not found");
-    }
+      if (!refreshToken) {
+        console.log("Refresh token not found");
+        return res.status(HttpCode.BAD_REQUEST).send("Refresh token not found");
+      }
 
-    await this.authService.logout(refreshToken);
+      await this.authService.logout(refreshToken);
 
-    res.clearCookie(REFRESH_TOKEN_COOKIE_NAME);
-    res.status(HttpCode.OK).send("Logged out");
+      res.status(HttpCode.OK).send("Logged out");
+    },
   });
 
   private setRefreshTokenCookie = (
