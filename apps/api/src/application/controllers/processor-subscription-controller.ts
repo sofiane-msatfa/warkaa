@@ -1,36 +1,29 @@
-import { injectable, inject, named } from "inversify";
-import { Type } from "@/container/types.js";
-import { ServiceTag } from "@/domain/enum/service-tag.js";
 import type { MessengerSubscriptionCallback } from "@/domain/internal/messenger-subscription-callback.js";
-import type { CsvProcessorService } from "@/domain/usecase/csv-processor-service.js";
-import type { ProcessDocumentQueueMessage } from "@/domain/internal/process-document-queue-message.js";
+import type { ProcessDocumentBatchMessage } from "@/domain/internal/process-document-batch-message.js";
+import type { ProcessorSubscriptionService } from "@/domain/usecase/processor-subscription-service.js";
+import { injectable, inject } from "inversify";
+import { Type } from "@/container/types.js";
+import { performance } from "perf_hooks";
 
 @injectable()
 export class ProcessorSubscriptionController {
   constructor(
-    @inject(Type.CsvProcessorService)
-    @named(ServiceTag.Branch)
-    private readonly branchProcessorService: CsvProcessorService
+    @inject(Type.ProcessorSubscriptionService)
+    private readonly processorSubscriptionService: ProcessorSubscriptionService
   ) {}
 
-  public processAllDocuments: MessengerSubscriptionCallback = async (
+  public processDocumentBatch: MessengerSubscriptionCallback = async (
     message
   ) => {
-    const processDocumentQueueMessage: ProcessDocumentQueueMessage =
+    const processDocumentBatchMessage: ProcessDocumentBatchMessage =
       JSON.parse(message);
 
-    if (processDocumentQueueMessage.Branch) {
-      const result = await this.branchProcessorService.process(
-        processDocumentQueueMessage.Branch.path
+    const processorResultAggregate =
+      await this.processorSubscriptionService.processDocumentBatch(
+        processDocumentBatchMessage
       );
 
-      if (result.isOk()) {
-        console.log("Branch file processed successfully.");
-        return;
-      }
-
-      console.error("Branch file processing failed.");
-      console.error(result.unwrapErr().length);
-    }
+    // TODO send response via socket.io
+    console.log({ processorResultAggregate });
   };
 }

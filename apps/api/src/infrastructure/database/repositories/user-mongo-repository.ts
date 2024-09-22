@@ -7,6 +7,7 @@ import { injectable } from "inversify";
 import { env } from "@/env.js";
 import UserModel, { type UserDocument } from "../models/user.js";
 import RefreshTokenModel from "../models/refresh-token.js";
+import { addMilliseconds } from "date-fns";
 
 @injectable()
 export class UserMongoRepository implements UserRepository {
@@ -68,7 +69,10 @@ export class UserMongoRepository implements UserRepository {
     await RefreshTokenModel.create({
       userId,
       token: refreshToken,
-      expiresAt: new Date(Date.now() + env.REFRESH_TOKEN_EXPIRATION_IN_MS),
+      expiresAt: addMilliseconds(
+        new Date(),
+        env.REFRESH_TOKEN_EXPIRATION_IN_MS
+      ),
     });
   }
 
@@ -78,7 +82,7 @@ export class UserMongoRepository implements UserRepository {
 
   private toUserEntity(user: UserDocument): User {
     return {
-      // @ts-ignore 
+      // @ts-ignore
       id: user._id.toString(),
       email: user.email,
       firstname: user.firstname,

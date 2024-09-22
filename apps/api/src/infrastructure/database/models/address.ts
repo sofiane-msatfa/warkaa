@@ -1,6 +1,5 @@
 import type { Document } from "mongoose";
-import { model, Schema } from "mongoose";
-import { Collection } from "@/domain/enum/collection.js";
+import { Schema } from "mongoose";
 
 // "EntityNumber","TypeOfAddress","CountryNL","CountryFR","Zipcode","MunicipalityNL","MunicipalityFR","StreetNL",
 // "StreetFR","HouseNumber","Box","ExtraAddressInfo","DateStrikingOff"

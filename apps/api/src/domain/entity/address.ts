@@ -10,5 +10,5 @@ export interface Address {
   houseNumber: string;
   box: string;
   extraAddressInfo: string;
-  dateStrikingOff: Date;
+  dateStrikingOff: Date | string;
 }

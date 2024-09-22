@@ -9,18 +9,10 @@ import amqplib from "amqplib";
 export class RabbitMQApi implements MessengerApi {
   public static CONNECTION_RETRY_DELAY = 5000;
   public static PUBLISH_RETRY_DELAY = 5000;
-  public static instance: RabbitMQApi;
   private channel: amqplib.Channel | null = null;
   private connection: amqplib.Connection | null = null;
   private offlineQueue: Array<{ queue: string; message: string }> = [];
   private subscriptions: Map<string, MessengerSubscriptionCallback> = new Map();
-
-  public static getInstance(): RabbitMQApi {
-    if (!RabbitMQApi.instance) {
-      RabbitMQApi.instance = new RabbitMQApi();
-    }
-    return RabbitMQApi.instance;
-  }
 
   async getChannel(): Promise<amqplib.Channel> {
     if (this.channel) {

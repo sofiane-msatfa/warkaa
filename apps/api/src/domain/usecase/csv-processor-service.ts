@@ -1,7 +1,6 @@
-import type { AsyncResult } from "@/application/types/async-result.js";
-import type { ProcessorError } from "@/domain/internal/processor-error.js";
+import type { ProcessorResult } from "../internal/processor-result.js";
 
 export interface CsvProcessorService {
   parse(): NodeJS.WritableStream;
-  process(filePath: string): AsyncResult<number, ProcessorError[]>;
+  process(filePath: string): Promise<ProcessorResult>;
 }

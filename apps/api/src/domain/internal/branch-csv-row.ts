@@ -1,4 +1,4 @@
-export interface BranchRow {
+export interface BranchCsvRow {
   Id: string;
   StartDate: string;
   EnterpriseNumber: string;

@@ -1,6 +1,5 @@
 import type { Document } from "mongoose";
-import { model, Schema } from "mongoose";
-import { Collection } from "@/domain/enum/collection.js";
+import { Schema } from "mongoose";
 
 // "EntityNumber","EntityContact","ContactType","Value"
 // "0200.362.210","ENT","EMAIL","officiel.ic-inbw@inbw.be"

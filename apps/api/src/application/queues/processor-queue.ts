@@ -10,6 +10,6 @@ export async function processorQueue(messenger: MessengerApi): Promise<void> {
 
   await messenger.subscribe(
     MessengerQueue.Processor,
-    processorSubscriptionController.processAllDocuments
+    processorSubscriptionController.processDocumentBatch
   );
 }

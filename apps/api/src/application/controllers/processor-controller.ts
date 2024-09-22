@@ -5,8 +5,9 @@ import { extractEnumValues } from "@/application/utils/enum.js";
 import { UploadFieldName } from "@common/enum/upload-field-name.js";
 import { MessengerQueue } from "@/domain/enum/messenger-queue.js";
 import { HttpCode } from "@/domain/enum/http-code.js";
+import { Collection } from "@/domain/enum/collection.js";
 import type { MessengerApi } from "@/domain/gateway/messenger-api.js";
-import type { ProcessDocumentQueueMessage } from "@/domain/internal/process-document-queue-message.js";
+import type { ProcessDocumentBatchMessage } from "@/domain/internal/process-document-batch-message.js";
 
 interface MulterFileDictionary {
   [fieldName: string]: Express.Multer.File[];
@@ -38,12 +39,13 @@ export class ProcessorController {
   });
 
   private buildProcessDocumentQueueMessage(files: MulterFileDictionary) {
-    const processDocumentQueueMessage: ProcessDocumentQueueMessage = {};
+    const processDocumentBatchMessage: ProcessDocumentBatchMessage = {};
 
     extractEnumValues(UploadFieldName).forEach((fieldName) => {
+      const collection = this.getUploadFieldNameCollection(fieldName);
       const file = files[fieldName]?.[0];
       if (file) {
-        processDocumentQueueMessage[fieldName] = {
+        processDocumentBatchMessage[collection] = {
           mimetype: file.mimetype,
           originalName: file.originalname,
           path: file.path,
@@ -52,6 +54,25 @@ export class ProcessorController {
       }
     });
 
-    return processDocumentQueueMessage;
+    return processDocumentBatchMessage;
+  }
+
+  private getUploadFieldNameCollection(fieldName: UploadFieldName): Collection {
+    switch (fieldName) {
+      case UploadFieldName.Enterprise:
+        return Collection.Enterprise;
+      case UploadFieldName.Branch:
+        return Collection.Branch;
+      case UploadFieldName.Establishment:
+        return Collection.Establishment;
+      case UploadFieldName.Contact:
+        return Collection.Contact;
+      case UploadFieldName.Address:
+        return Collection.Address;
+      case UploadFieldName.Activity:
+        return Collection.Activity;
+      case UploadFieldName.Denomination:
+        return Collection.Denomination;
+    }
   }
 }

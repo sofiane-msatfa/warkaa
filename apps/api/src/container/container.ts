@@ -15,11 +15,7 @@ export function bindIdentifierNamed<T>(
   instance: interfaces.Newable<T>,
   name: string
 ) {
-  return container
-    .bind(identifier)
-    .to(instance)
-    .inSingletonScope()
-    .whenTargetNamed(name);
+  return container.bind(identifier).to(instance).whenTargetNamed(name);
 }
 
 export function bindSelf<T>(instance: interfaces.Newable<T>) {

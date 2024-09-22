@@ -13,9 +13,9 @@ export interface CodeDocument extends Document {
 
 const CodeSchema = new Schema<CodeDocument>({
   category: { type: String, required: true },
-  code: { type: String, required: false },
-  language: { type: Date, required: false },
-  description: { type: String, required: false },
+  code: String,
+  language: Date,
+  description: String,
 });
 
 const CodeModel = model<CodeDocument>(Collection.Code, CodeSchema);

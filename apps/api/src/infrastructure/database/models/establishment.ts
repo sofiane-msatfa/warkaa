@@ -14,7 +14,8 @@ import {
 export interface EstablishmentDocument extends Document {
   establishmentNumber: string;
   startDate: Date;
-  enterpriseNumber: Schema.Types.ObjectId;
+  enterprise: Schema.Types.ObjectId;
+  enterpriseNumber: string;
   activities: ActivityDocument[];
   addresses: AddressDocument[];
   contacts: ContactDocument[];
@@ -23,12 +24,13 @@ export interface EstablishmentDocument extends Document {
 
 const EstablishmentSchema = new Schema<EstablishmentDocument>({
   establishmentNumber: { type: String, required: true },
-  startDate: { type: Date, required: false },
-  enterpriseNumber: {
+  startDate: Date,
+  enterprise: {
     type: Schema.Types.ObjectId,
     ref: Collection.Enterprise,
     required: true,
   },
+  enterpriseNumber: { type: String, required: true },
   activities: [ActivitySchema],
   addresses: [AddressSchema],
   contacts: [ContactSchema],

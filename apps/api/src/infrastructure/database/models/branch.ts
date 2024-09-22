@@ -12,9 +12,10 @@ import {
 //"Id","StartDate","EnterpriseNumber"
 // "9.000.006.626",01-09-1995,"0257.883.408"
 export interface BranchDocument extends Document {
-  id: string;
+  branchNumber: string;
   startDate: Date;
-  enterpriseNumber: Schema.Types.ObjectId;
+  enterprise: Schema.Types.ObjectId;
+  enterpriseNumber: string;
   activities: ActivityDocument[];
   addresses: AddressDocument[];
   contacts: ContactDocument[];
@@ -22,13 +23,14 @@ export interface BranchDocument extends Document {
 }
 
 const BranchSchema = new Schema<BranchDocument>({
-  id: { type: String, required: true, unique: true },
+  branchNumber: { type: String, required: true, unique: true },
   startDate: Date,
-  enterpriseNumber: {
+  enterprise: {
     type: Schema.Types.ObjectId,
     ref: Collection.Enterprise,
     required: true,
   },
+  enterpriseNumber: { type: String, required: true },
   activities: [ActivitySchema],
   addresses: [AddressSchema],
   contacts: [ContactSchema],

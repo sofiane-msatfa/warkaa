@@ -5,6 +5,7 @@ import { getUserLightFromRequest } from "@/application/utils/auth.js";
 import { userRouter } from "./user-router.js";
 import { authRouter } from "./auth-router.js";
 import { uploadRouter } from "./upload-router.js";
+import { branchRouter } from "./branch-router.js";
 
 export function registerRouters(app: Express): void {
   app.get("/health", (_req, res) => {
@@ -16,7 +17,7 @@ export function registerRouters(app: Express): void {
   });
 
   // routes
-  [userRouter, authRouter, uploadRouter].forEach((router) => {
+  [userRouter, authRouter, uploadRouter, branchRouter].forEach((router) => {
     app.use(router());
   });
 

@@ -19,7 +19,7 @@ services:
       timeout: 5s
       retries: 5
   rabbitmq:
-    image: rabbitmq:alpine
+    image: rabbitmq:management-alpine
     restart: unless-stopped
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq

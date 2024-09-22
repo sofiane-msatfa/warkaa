@@ -1,16 +1,18 @@
+import type { BranchCsvRow } from "@/domain/internal/branch-csv-row.js";
+import type { BranchRepository } from "@/domain/gateway/branch-repository.js";
 import { inject, injectable } from "inversify";
 import { Type } from "@/container/types.js";
-import type { BranchRow } from "@/domain/internal/branch-row.js";
 import {
   branchCreateRequestSchema,
   type BranchCreateRequest,
 } from "@common/dto/branch-create-request.js";
-import type { BranchRepository } from "@/domain/gateway/branch-repository.js";
 import { AbstractProcessorService } from "./abstract-processor-service.js";
+import { parseDate } from "../utils/date.js";
+import { Collection } from "@/domain/enum/collection.js";
 
 @injectable()
 export class BranchProcessorService extends AbstractProcessorService<
-  BranchRow,
+  BranchCsvRow,
   BranchCreateRequest
 > {
   constructor(
@@ -20,16 +22,20 @@ export class BranchProcessorService extends AbstractProcessorService<
     super();
   }
 
+  protected collection = Collection.Enterprise;
+
   protected headers = ["Id", "StartDate", "EnterpriseNumber"];
 
-  protected batchAction(batch: BranchCreateRequest[]) {
-    return this.branchRepository.bulkUpsert(batch);
-  }
+  protected override batchSize = 10_000;
 
-  protected tranform(row: BranchRow): BranchCreateRequest {
+  protected batchAction = async (batch: BranchCreateRequest[]) => {
+    await this.branchRepository.bulkUpsert(batch);
+  };
+
+  protected tranform(row: BranchCsvRow): BranchCreateRequest {
     return {
-      id: row.Id,
-      startDate: new Date(row.StartDate),
+      branchNumber: row.Id,
+      startDate: parseDate(row.StartDate),
       enterpriseNumber: row.EnterpriseNumber,
     };
   }

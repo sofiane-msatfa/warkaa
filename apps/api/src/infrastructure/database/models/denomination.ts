@@ -1,6 +1,5 @@
 import type { Document } from "mongoose";
-import { model, Schema } from "mongoose";
-import { Collection } from "@/domain/enum/collection.js";
+import { Schema } from "mongoose";
 
 // "EntityNumber","Language","TypeOfDenomination","Denomination"
 // "0200.065.765","2","001","Intergemeentelijke Vereniging Veneco"
