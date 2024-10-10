@@ -10,11 +10,15 @@ export const env = createEnv({
     PORT: NUMBER.int().default(3000),
     MONGODB_URI: STRING.url(),
     ENABLE_SWAGGER: BOOLEAN.default("false"),
+    FRONTEND_URL: STRING.url().default("http://10.0.0.2:5173"),
     ACCESS_TOKEN_SECRET: STRING,
     REFRESH_TOKEN_SECRET: STRING,
     REFRESH_TOKEN_EXPIRATION_IN_MS: NUMBER.int().default(
       1000 * 60 * 60 * 24 * 7
     ), // 7 days
+    RABBITMQ_HOST: STRING.default("localhost"),
+    RABBITMQ_USER: STRING.default("guest"),
+    RABBITMQ_PASSWORD: STRING.default("guest"),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,

@@ -7,10 +7,10 @@ export function authRouter(): Router {
   const router = Router();
   const controller = getInstance(AuthController);
 
-  router.post("/login", controller.login);
-  router.post("/register", controller.register);
-  router.post("/refresh", controller.refreshTokens);
-  router.post("/logout", controller.logout);
+  router.post("/auth/login", controller.login);
+  router.post("/auth/register", controller.register);
+  router.post("/auth/refresh", controller.refreshTokens);
+  router.post("/auth/logout", controller.logout);
 
   return router;
 }
